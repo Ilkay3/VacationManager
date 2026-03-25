@@ -1,0 +1,33 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace VacationManager.Models
+{
+    public class VacationRequest
+    {
+        public int Id { get; set; }
+
+        [Required]
+        public DateTime StartDate { get; set; }
+
+        [Required]
+        public DateTime EndDate { get; set; }
+
+        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+
+        public bool IsHalfDay { get; set; }
+
+        public bool IsApproved { get; set; } = false;
+
+        // Type
+        public int VacationTypeId { get; set; }
+        public VacationType VacationType { get; set; }
+
+        // File (за болничен)
+        [StringLength(255)]
+        public string FilePath { get; set; }
+
+        // User
+        public int UserId { get; set; }
+        public User User { get; set; }
+    }
+}
