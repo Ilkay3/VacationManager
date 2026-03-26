@@ -16,10 +16,10 @@ namespace VacationManager.Models
         public Project Project { get; set; }
 
         // Team Lead
-        public int? TeamLeadId { get; set; }
-        public User TeamLead { get; set; }
+        public string TeamLeadId { get; set; }
+        public ApplicationUser TeamLead { get; set; }
 
         // Members
-        public ICollection<User> Developers { get; set; } = new List<User>();
+        public ICollection<ApplicationUser> Developers { get; set; } = new List<ApplicationUser>();
     }
 }

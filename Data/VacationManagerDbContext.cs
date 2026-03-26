@@ -1,80 +1,96 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using VacationManager.Models;
 
 namespace VacationManager.Data
 {
-    public class VacationManagerDbContext : DbContext
+    public class VacationManagerDbContext : IdentityDbContext<ApplicationUser>
     {
-        public VacationManagerDbContext(DbContextOptions<VacationManagerDbContext> options)
-            : base(options) { }
-
-        public DbSet<User> Users { get; set; }
-        public DbSet<Role> Roles { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<VacationRequest> VacationRequests { get; set; }
         public DbSet<VacationType> VacationTypes { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        public VacationManagerDbContext(DbContextOptions<VacationManagerDbContext> options)
+            : base(options) { }
+
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(builder);
 
-            // 🔹 User -> Role
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Role)
-                .WithMany(r => r.Users)
-                .HasForeignKey(u => u.RoleId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // 🔹 User -> Team
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Team)
-                .WithMany(t => t.Members)
-                .HasForeignKey(u => u.TeamId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            // 🔹 Team -> TeamLead (1:1)
-            modelBuilder.Entity<Team>()
+            // ------------------------------
+            // TeamLead relation (1:1)
+            // ------------------------------
+            builder.Entity<Team>()
                 .HasOne(t => t.TeamLead)
                 .WithOne(u => u.LedTeam)
                 .HasForeignKey<Team>(t => t.TeamLeadId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // 🔹 Team -> Project
-            modelBuilder.Entity<Team>()
+            // ------------------------------
+            // User → Team (many-to-1)
+            // ------------------------------
+            builder.Entity<ApplicationUser>()
+                .HasOne(u => u.Team)
+                .WithMany(t => t.Developers)
+                .HasForeignKey(u => u.TeamId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // ------------------------------
+            // Team → Project (many-to-1)
+            // ------------------------------
+            builder.Entity<Team>()
                 .HasOne(t => t.Project)
                 .WithMany(p => p.Teams)
                 .HasForeignKey(t => t.ProjectId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
-            // 🔹 VacationRequest -> User
-            modelBuilder.Entity<VacationRequest>()
+            // ------------------------------
+            // VacationRequest → User (many-to-1)
+            // ------------------------------
+            builder.Entity<VacationRequest>()
                 .HasOne(v => v.User)
                 .WithMany(u => u.VacationRequests)
                 .HasForeignKey(v => v.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 🔹 VacationRequest -> VacationType
-            modelBuilder.Entity<VacationRequest>()
+            // ------------------------------
+            // VacationRequest → VacationType (many-to-1)
+            // ------------------------------
+            builder.Entity<VacationRequest>()
                 .HasOne(v => v.VacationType)
                 .WithMany(t => t.VacationRequests)
                 .HasForeignKey(v => v.VacationTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // 🔥 Seed Roles
-            modelBuilder.Entity<Role>().HasData(
-                new Role { Id = 1, Name = "CEO" },
-                new Role { Id = 2, Name = "Team Lead" },
-                new Role { Id = 3, Name = "Developer" },
-                new Role { Id = 4, Name = "Unassigned" }
-            );
+            // ------------------------------
+            // MySQL fix за DateTime
+            // ------------------------------
+            builder.Entity<VacationRequest>()
+                .Property(v => v.CreatedOn)
+                .HasColumnType("datetime");
 
-            // 🔥 Seed VacationTypes
-            modelBuilder.Entity<VacationType>().HasData(
+            // ------------------------------
+            // Seed VacationTypes
+            // ------------------------------
+            builder.Entity<VacationType>().HasData(
                 new VacationType { Id = 1, Name = "Paid" },
                 new VacationType { Id = 2, Name = "Unpaid" },
                 new VacationType { Id = 3, Name = "Sick" }
             );
+
+            // ------------------------------
+            // Seed Identity Roles
+            // ------------------------------
+            var roles = new[]
+            {
+            new IdentityRole { Id = "1", Name = "CEO", NormalizedName = "CEO" },
+            new IdentityRole { Id = "2", Name = "Team Lead", NormalizedName = "TEAM LEAD" },
+            new IdentityRole { Id = "3", Name = "Developer", NormalizedName = "DEVELOPER" }
+        };
+
+            builder.Entity<IdentityRole>().HasData(roles);
         }
     }
 }

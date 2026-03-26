@@ -27,7 +27,7 @@ namespace VacationManager.Models
         public string FilePath { get; set; }
 
         // User
-        public int UserId { get; set; }
-        public User User { get; set; }
+        public string UserId { get; set; }
+        public ApplicationUser User { get; set; }
     }
 }

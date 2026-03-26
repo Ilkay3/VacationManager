@@ -17,7 +17,7 @@ namespace VacationManager.Models
         public int? TeamId { get; set; }
         public Team Team { get; set; }
 
-        // Team Lead
+        // Ако е Team Lead
         public Team LedTeam { get; set; }
 
         public ICollection<VacationRequest> VacationRequests { get; set; } = new List<VacationRequest>();

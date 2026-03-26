@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using VacationManager.Data;
+using Microsoft.AspNetCore.Identity;
+using VacationManager.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // ?? Add DbContext with MySQL
 builder.Services.AddDbContext<VacationManagerDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<VacationManagerDbContext>();
 
 builder.Services.AddControllersWithViews();
 
