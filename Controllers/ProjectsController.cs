@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VacationManager.Data;
@@ -10,59 +11,199 @@ namespace VacationManager.Controllers
     public class ProjectsController : Controller
     {
         private readonly VacationManagerDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ProjectsController(VacationManagerDbContext context)
+        public ProjectsController(
+            VacationManagerDbContext context,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index(string search)
+        // 📄 MY REQUESTS (вместо Index)
+        public async Task<IActionResult> MyRequests()
         {
-            var query = _context.Projects.AsQueryable();
+            var user = await _userManager.GetUserAsync(User);
 
-            if (!string.IsNullOrEmpty(search))
+            var requests = await _context.VacationRequests
+                .Where(r => r.UserId == user.Id)
+                .Include(r => r.VacationType)
+                .ToListAsync();
+
+            return View(requests);
+        }
+
+        // ➕ CREATE (GET)
+        public IActionResult Create()
+        {
+            ViewBag.Types = _context.VacationTypes.ToList();
+            return View();
+        }
+
+        // ➕ CREATE (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(VacationRequest model, IFormFile file)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            // DATE VALIDATION
+            if (model.StartDate > model.EndDate)
+                ModelState.AddModelError("", "Start date cannot be after end date.");
+
+            if (model.StartDate < DateTime.Today)
+                ModelState.AddModelError("", "Start date cannot be in the past.");
+
+            if (model.EndDate < DateTime.Today)
+                ModelState.AddModelError("", "End date cannot be in the past.");
+
+            var vacationType = await _context.VacationTypes
+                .FirstOrDefaultAsync(v => v.Id == model.VacationTypeId);
+
+            if (vacationType == null)
+                ModelState.AddModelError("", "Invalid vacation type.");
+
+            // SICK RULES
+            if (vacationType != null && vacationType.Name == "Sick")
             {
-                query = query.Where(p =>
-                    p.Name.Contains(search) ||
-                    p.Description.Contains(search));
+                if (model.IsHalfDay)
+                    ModelState.AddModelError("", "Sick leave cannot be half-day.");
+
+                if (file == null)
+                    ModelState.AddModelError("", "Medical document is required.");
             }
 
-            return View(await query.ToListAsync());
-        }
+            // HALF DAY
+            if (model.IsHalfDay && model.StartDate != model.EndDate)
+                ModelState.AddModelError("", "Half day only for one day.");
 
-        public IActionResult Create() => View();
+            // FILE VALIDATION
+            if (file != null)
+            {
+                var allowed = new[] { ".jpg", ".png", ".pdf" };
+                var ext = Path.GetExtension(file.FileName).ToLower();
 
-        [HttpPost]
-        public async Task<IActionResult> Create(Project model)
-        {
-            if (!ModelState.IsValid) return View(model);
+                if (!allowed.Contains(ext))
+                    ModelState.AddModelError("", "Invalid file type.");
 
-            _context.Projects.Add(model);
+                if (file.Length > 5 * 1024 * 1024)
+                    ModelState.AddModelError("", "File too large.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Types = _context.VacationTypes.ToList();
+                return View(model);
+            }
+
+            // SAVE FILE
+            if (file != null)
+            {
+                var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                var path = Path.Combine("wwwroot/files", fileName);
+
+                using var stream = new FileStream(path, FileMode.Create);
+                await file.CopyToAsync(stream);
+
+                model.FilePath = "/files/" + fileName;
+            }
+
+            model.UserId = user.Id;
+            model.CreatedOn = DateTime.UtcNow;
+            model.IsApproved = false;
+
+            _context.VacationRequests.Add(model);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(MyRequests));
         }
 
-        public async Task<IActionResult> Details(int id)
+        // ✏️ EDIT (GET)
+        public async Task<IActionResult> Edit(int id)
         {
-            var project = await _context.Projects
-                .Include(p => p.Teams)
-                .FirstOrDefaultAsync(p => p.Id == id);
+            var request = await _context.VacationRequests.FindAsync(id);
 
-            return View(project);
+            if (request == null)
+                return NotFound();
+
+            ViewBag.Types = _context.VacationTypes.ToList();
+            return View(request);
         }
 
-        public async Task<IActionResult> Delete(int id)
+        // ✏️ EDIT (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(VacationRequest model, IFormFile file)
         {
-            var project = await _context.Projects.FindAsync(id);
+            var request = await _context.VacationRequests.FindAsync(model.Id);
 
-            if (project != null)
+            if (request == null)
+                return NotFound();
+
+            // VALIDATION (същото като Create)
+            if (model.StartDate > model.EndDate)
+                ModelState.AddModelError("", "Start date cannot be after end date.");
+
+            var vacationType = await _context.VacationTypes
+                .FirstOrDefaultAsync(v => v.Id == model.VacationTypeId);
+
+            if (vacationType != null && vacationType.Name == "Sick")
             {
-                _context.Projects.Remove(project);
-                await _context.SaveChangesAsync();
+                if (model.IsHalfDay)
+                    ModelState.AddModelError("", "Sick leave cannot be half-day.");
+
+                if (file == null && request.FilePath == null)
+                    ModelState.AddModelError("", "Medical document required.");
             }
 
-            return RedirectToAction(nameof(Index));
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Types = _context.VacationTypes.ToList();
+                return View(model);
+            }
+
+            // UPDATE
+            request.StartDate = model.StartDate;
+            request.EndDate = model.EndDate;
+            request.VacationTypeId = model.VacationTypeId;
+            request.IsHalfDay = model.IsHalfDay;
+
+            // FILE
+            if (file != null)
+            {
+                var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                var path = Path.Combine("wwwroot/files", fileName);
+
+                using var stream = new FileStream(path, FileMode.Create);
+                await file.CopyToAsync(stream);
+
+                request.FilePath = "/files/" + fileName;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(MyRequests));
+        }
+
+        // 🗑️ DELETE
+        public async Task<IActionResult> Delete(int id)
+        {
+            var request = await _context.VacationRequests.FindAsync(id);
+            return View(request);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var request = await _context.VacationRequests.FindAsync(id);
+
+            if (request != null)
+                _context.VacationRequests.Remove(request);
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(MyRequests));
         }
     }
 }
