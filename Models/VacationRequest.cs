@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VacationManager.Models
 {
@@ -18,16 +19,15 @@ namespace VacationManager.Models
 
         public bool IsApproved { get; set; } = false;
 
-        // Type
+        [Required]
         public int VacationTypeId { get; set; }
-        public VacationType VacationType { get; set; }
 
-        // File (за болничен)
-        [StringLength(255)]
-        public string FilePath { get; set; }
+        public VacationType? VacationType { get; set; }
 
-        // User
-        public string UserId { get; set; }
-        public ApplicationUser User { get; set; }
+        public string? FilePath { get; set; }
+
+        public string? UserId { get; set; }
+
+        public ApplicationUser? User { get; set; }
     }
 }

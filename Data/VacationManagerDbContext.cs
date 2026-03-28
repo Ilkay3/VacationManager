@@ -33,7 +33,7 @@ namespace VacationManager.Data
             // ------------------------------
             builder.Entity<ApplicationUser>()
                 .HasOne(u => u.Team)
-                .WithMany(t => t.Developers)
+                .WithMany(t => t.Members)
                 .HasForeignKey(u => u.TeamId)
                 .OnDelete(DeleteBehavior.SetNull);
 

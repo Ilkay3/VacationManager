@@ -28,12 +28,9 @@
     <!-- Vacation Type -->
     <div class="mb-3">
         <label>Vacation Type</label>
-        <select asp-for="VacationTypeId" class="form-control">
-            @foreach (var type in ViewBag.Types)
-            {
-                    <option value="@type.Id">@type.Name</option>
-            }
-        </select>
+                <select asp-for="VacationTypeId" class="form-control"
+                    asp-items="ViewBag.VacationTypeId">
+                </select>
     </div>
 
     <!-- Half Day -->

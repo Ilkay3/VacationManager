@@ -20,6 +20,6 @@ namespace VacationManager.Models
         public ApplicationUser TeamLead { get; set; }
 
         // Members
-        public ICollection<ApplicationUser> Developers { get; set; } = new List<ApplicationUser>();
+        public ICollection<ApplicationUser> Members { get; set; }
     }
 }

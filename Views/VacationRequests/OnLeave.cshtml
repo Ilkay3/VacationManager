@@ -1,0 +1,25 @@
+﻿@model IEnumerable<VacationManager.Models.VacationRequest>
+
+<h2>Users Currently On Leave</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Type</th>
+            <th>From</th>
+            <th>To</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var v in Model)
+        {
+                <tr>
+                    <td>@v.User?.Email</td>
+                    <td>@v.VacationType?.Name</td>
+                    <td>@v.StartDate.ToShortDateString()</td>
+                    <td>@v.EndDate.ToShortDateString()</td>
+                </tr>
+        }
+    </tbody>
+</table>

@@ -23,10 +23,6 @@ namespace VacationManager.Models
         [StringLength(50)]
         public string LastName { get; set; }
 
-        // Role
-        public int RoleId { get; set; }
-        public Role Role { get; set; }
-
         // Team
         public int? TeamId { get; set; }
         public Team Team { get; set; }

@@ -1,0 +1,48 @@
+﻿@model IEnumerable<VacationRequest>
+
+@{
+    ViewData["Title"] = "My Vacation Requests";
+}
+
+<h2>My Vacation Requests</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">New Request</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Start</th>
+            <th>End</th>
+            <th>Type</th>
+            <th>Half Day</th>
+            <th>Approved</th>
+            <th>File</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var v in Model)
+        {
+                <tr>
+                    <td>@v.StartDate.ToShortDateString()</td>
+                    <td>@v.EndDate.ToShortDateString()</td>
+                    <td>@v.VacationType?.Name</td>
+                    <td>@v.IsHalfDay</td>
+                    <td>@v.IsApproved</td>
+
+                    <td>
+                    @if (v.FilePath != null)
+                    {
+                                <a href="@v.FilePath" target="_blank">Download</a>
+                    }
+                    </td>
+
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@v.Id">Edit</a> |
+                        <a asp-action="Delete" asp-route-id="@v.Id">Delete</a>
+                    </td>
+                </tr>
+        }
+    </tbody>
+</table>

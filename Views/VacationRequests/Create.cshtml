@@ -1,15 +1,15 @@
-﻿@model VacationRequest
+﻿@model VacationManager.Models.VacationRequest
 
 @{
     ViewData["Title"] = "Create Vacation Request";
 }
 
-
 <h2>Create Vacation Request</h2>
 
 <form asp-action="Create" method="post" enctype="multipart/form-data">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @Html.AntiForgeryToken()
 
+    <div asp-validation-summary="All" class="text-danger"></div>
     <!-- Start Date -->
     <div class="mb-3">
         <label asp-for="StartDate"></label>
@@ -26,13 +26,12 @@
 
     <!-- Vacation Type -->
     <div class="mb-3">
-        <label>Vacation Type</label>
-        <select asp-for="VacationTypeId" class="form-control">
-            @foreach (var type in ViewBag.Types)
-            {
-                    <option value="@type.Id">@type.Name</option>
-            }
+        <label asp-for="VacationTypeId"></label>
+        <select asp-for="VacationTypeId"
+                class="form-control"
+                asp-items="ViewBag.VacationTypeId">
         </select>
+        <span asp-validation-for="VacationTypeId" class="text-danger"></span>
     </div>
 
     <!-- Half Day -->

@@ -1,0 +1,44 @@
+﻿@model IEnumerable<VacationManager.Models.VacationRequest>
+
+@{
+    ViewData["Title"] = "All Vacation Requests";
+}
+
+<h2>All Vacation Requests</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Type</th>
+            <th>Approved</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var v in Model)
+        {
+                <tr>
+                    <td>@v.User?.Email</td>
+                    <td>@v.StartDate.ToShortDateString()</td>
+                    <td>@v.EndDate.ToShortDateString()</td>
+                    <td>@v.VacationType?.Name</td>
+                    <td>@v.IsApproved</td>
+
+    <td>
+                    @if (!v.IsApproved && (User.IsInRole("CEO") || User.IsInRole("Team Lead")))
+                    {
+                <a asp-action="Approve"
+                   asp-route-id="@v.Id"
+                   class="btn btn-success btn-sm">
+                    Approve
+                </a>
+                    }
+    </td>
+                </tr>
+        }
+    </tbody>
+</table>
