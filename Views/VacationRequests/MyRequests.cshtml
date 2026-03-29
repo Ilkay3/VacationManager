@@ -28,16 +28,27 @@
                     <td>@v.StartDate.ToShortDateString()</td>
                     <td>@v.EndDate.ToShortDateString()</td>
                     <td>@v.VacationType?.Name</td>
-                    <td>@v.IsHalfDay</td>
-                    <td>@v.IsApproved</td>
-
+                    <td>@(v.IsHalfDay ? "Yes" : "No")</td>
+    <td>
+                    @if (v.Status == "Pending")
+                    {
+                <span class="text-warning">Pending</span>
+                    }
+                    else if (v.Status == "Approved")
+                    {
+                <span class="text-success">Approved</span>
+                    }
+                    else if (v.Status == "Rejected")
+                    {
+                <span class="text-danger">Rejected</span>
+                    }
+    </td>
                     <td>
                     @if (v.FilePath != null)
                     {
                                 <a href="@v.FilePath" target="_blank">Download</a>
                     }
                     </td>
-
                     <td>
                         <a asp-action="Edit" asp-route-id="@v.Id">Edit</a> |
                         <a asp-action="Delete" asp-route-id="@v.Id">Delete</a>

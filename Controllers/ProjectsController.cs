@@ -111,7 +111,7 @@ namespace VacationManager.Controllers
 
             model.UserId = user.Id;
             model.CreatedOn = DateTime.UtcNow;
-            model.IsApproved = false;
+            model.Status = "Rejected";
 
             _context.VacationRequests.Add(model);
             await _context.SaveChangesAsync();

@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<VacationManager.Models.Team>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Teams";
 }
 
-<h1>Index</h1>
+<h1>Teams</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -34,7 +34,7 @@
                 @Html.DisplayFor(modelItem => item.Project.Name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.TeamLead.Id)
+                    @Html.DisplayFor(modelItem => item.TeamLead.FullName)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

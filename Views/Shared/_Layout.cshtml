@@ -30,12 +30,25 @@
         </a>
     </li>
 
+                        @if (User.IsInRole("CEO"))
+                        {
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Teams" asp-action="Index">Teams</a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Teams" asp-action="Create">Create Team</a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Teams" asp-action="AssignUser">Assign User</a>
+        </li>
+                        }
+
                         @if (User.IsInRole("CEO") || User.IsInRole("Team Lead"))
                         {
         <li class="nav-item">
-            <a class="nav-link"
-               asp-controller="VacationRequests"
-               asp-action="AllRequests">
+            <a class="nav-link" asp-controller="VacationRequests" asp-action="AllRequests">
                 All Requests
             </a>
         </li>

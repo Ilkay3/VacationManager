@@ -125,7 +125,7 @@ namespace VacationManager.Controllers
 
             model.UserId = user.Id;
             model.CreatedOn = DateTime.UtcNow;
-            model.IsApproved = false;
+            model.Status = "Rejected";
 
             _context.Add(model);
             await _context.SaveChangesAsync();
@@ -153,7 +153,7 @@ namespace VacationManager.Controllers
 
             if (isCEO)
             {
-                request.IsApproved = true;
+                request.Status = "Approved";
             }
             else
             {
@@ -169,15 +169,30 @@ namespace VacationManager.Controllers
                 // ако Team Lead е в отпуск
                 var leadOnLeave = await _context.VacationRequests
                     .AnyAsync(r => r.UserId == currentUser.Id
-                                && r.IsApproved
+                                && r.Status == "Approved"
                                 && r.StartDate <= DateTime.Today
                                 && r.EndDate >= DateTime.Today);
 
                 if (leadOnLeave)
                     return BadRequest("You are on leave. CEO must approve.");
 
-                request.IsApproved = true;
+                request.Status = "Approved";
             }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(AllRequests));
+        }
+
+        //Reject
+        public async Task<IActionResult> Reject(int id)
+        {
+            var request = await _context.VacationRequests.FindAsync(id);
+
+            if (request == null)
+                return NotFound();
+
+            request.Status = "Rejected";
 
             await _context.SaveChangesAsync();
 
@@ -219,7 +234,7 @@ namespace VacationManager.Controllers
             var today = DateTime.Today;
 
             var usersOnLeave = await _context.VacationRequests
-                .Where(r => r.IsApproved &&
+                .Where(r => r.Status == "Approved" &&
                             r.StartDate <= today &&
                             r.EndDate >= today)
                 .Include(r => r.User)
@@ -253,7 +268,7 @@ namespace VacationManager.Controllers
             var request = await _context.VacationRequests.FindAsync(id);
             if (request == null) return NotFound();
 
-            if (request.IsApproved)
+            if (request.Status == "Approved")
             {
                 ModelState.AddModelError("", "Cannot edit approved request.");
             }
@@ -307,7 +322,7 @@ namespace VacationManager.Controllers
 
             if (request == null) return NotFound();
 
-            if (request.IsApproved)
+            if (request.Status == "Approved")
                 return BadRequest("Cannot delete approved request.");
 
             _context.VacationRequests.Remove(request);

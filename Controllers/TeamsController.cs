@@ -27,10 +27,22 @@ namespace VacationManager.Controllers
         // GET: Teams
         public async Task<IActionResult> Index()
         {
-            var teams = await _context.Teams
+            var user = await _userManager.GetUserAsync(User);
+
+            var isCEO = await _userManager.IsInRoleAsync(user, "CEO");
+            var isTeamLead = await _userManager.IsInRoleAsync(user, "Team Lead");
+
+            IQueryable<Team> teamsQuery = _context.Teams
                 .Include(t => t.Project)
-                .Include(t => t.TeamLead)
-                .ToListAsync();
+                .Include(t => t.TeamLead);
+
+            if (isTeamLead)
+            {
+                // Взима само отбора, където TeamLeadId съвпада с текущия потребител
+                teamsQuery = teamsQuery.Where(t => t.TeamLeadId == user.Id);
+            }
+
+            var teams = await teamsQuery.ToListAsync();
 
             return View(teams);
         }
@@ -43,10 +55,16 @@ namespace VacationManager.Controllers
             var team = await _context.Teams
                 .Include(t => t.Project)
                 .Include(t => t.TeamLead)
-                .Include(t => t.Members)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (team == null) return NotFound();
+
+            // ВЗИМАМЕ MEMBERS ПРАВИЛНО
+            var members = await _context.Users
+                .Where(u => u.TeamId == team.Id)
+                .ToListAsync();
+
+            ViewBag.Members = members;
 
             return View(team);
         }
@@ -101,10 +119,15 @@ namespace VacationManager.Controllers
         // GET: Teams/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+                return NotFound();
 
-            var team = await _context.Teams.FindAsync(id);
-            if (team == null) return NotFound();
+            var team = await _context.Teams
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (team == null)
+                return NotFound();
 
             ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name", team.ProjectId);
 
@@ -117,32 +140,21 @@ namespace VacationManager.Controllers
         // POST: Teams/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Team team)
+        public async Task<IActionResult> Edit(int id, Team model)
         {
-            if (id != team.Id) return NotFound();
+            if (id != model.Id)
+                return NotFound();
 
-            if (!ModelState.IsValid)
-            {
-                ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name", team.ProjectId);
+            var team = await _context.Teams.FindAsync(id);
 
-                var teamLeads = await _userManager.GetUsersInRoleAsync("Team Lead");
-                ViewData["TeamLeadId"] = new SelectList(teamLeads, "Id", "Email", team.TeamLeadId);
+            if (team == null)
+                return NotFound();
 
-                return View(team);
-            }
+            team.Name = model.Name;
+            team.ProjectId = model.ProjectId;
+            team.TeamLeadId = model.TeamLeadId;
 
-            try
-            {
-                _context.Update(team);
-                await _context.SaveChangesAsync();
-            }
-            catch
-            {
-                if (!_context.Teams.Any(e => e.Id == team.Id))
-                    return NotFound();
-                else
-                    throw;
-            }
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
@@ -169,7 +181,7 @@ namespace VacationManager.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Teams");
         }
 
         // GET: Teams/Delete/5

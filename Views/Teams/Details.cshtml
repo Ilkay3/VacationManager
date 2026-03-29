@@ -26,11 +26,27 @@
             @Html.DisplayNameFor(model => model.TeamLead)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TeamLead.Id)
+            @Html.DisplayFor(model => model.TeamLead.FullName)
         </dd>
     </dl>
 </div>
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Teams">Back to List</a>
 </div>
+<h4>Team Members</h4>
+
+@if (ViewBag.Members != null && ((List<ApplicationUser>)ViewBag.Members).Any())
+{
+        <ul>
+        @foreach (var user in (List<ApplicationUser>)ViewBag.Members)
+        {
+                    <li>@user.FirstName @user.LastName (@user.Email)</li>
+        }
+        </ul>
+}
+else
+{
+        <p>No members in this team.</p>
+}

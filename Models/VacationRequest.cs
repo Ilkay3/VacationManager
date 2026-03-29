@@ -17,7 +17,7 @@ namespace VacationManager.Models
 
         public bool IsHalfDay { get; set; }
 
-        public bool IsApproved { get; set; } = false;
+        public string Status { get; set; } = "Pending";
 
         [Required]
         public int VacationTypeId { get; set; }

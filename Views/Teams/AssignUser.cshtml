@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Assign User to Team";
+}
+
+<h2>Assign User to Team</h2>
+
+<form asp-action="AssignUser" method="post">
+
+    <div class="mb-3">
+        <label>User</label>
+        <select name="userId" class="form-control" asp-items="ViewBag.Users"></select>
+    </div>
+
+    <div class="mb-3">
+        <label>Team</label>
+        <select name="teamId" class="form-control" asp-items="ViewBag.Teams"></select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Assign</button>
+    <a asp-action="Teams" class="btn btn-secondary">Back</a>
+
+</form>

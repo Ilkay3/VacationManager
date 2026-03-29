@@ -13,6 +13,8 @@ namespace VacationManager.Models
         [StringLength(50)]
         public string LastName { get; set; }
 
+        public string FullName => FirstName + " " + LastName;
+
         // Team
         public int? TeamId { get; set; }
         public Team Team { get; set; }

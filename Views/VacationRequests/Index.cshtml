@@ -24,9 +24,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.IsHalfDay)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsApproved)
-            </th>
+<th>
+                @Html.DisplayNameFor(model => model.Status)
+</th>
             <th>
                 @Html.DisplayNameFor(model => model.VacationType)
             </th>
@@ -54,9 +54,20 @@
             <td>
                 @Html.DisplayFor(modelItem => item.IsHalfDay)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsApproved)
-            </td>
+    <td>
+                    @if (item.Status == "Approved")
+                    {
+                <span class="badge bg-success">Approved</span>
+                    }
+                    else if (item.Status == "Rejected")
+                    {
+                <span class="badge bg-danger">Rejected</span>
+                    }
+                    else
+                    {
+                <span class="badge bg-warning text-dark">Pending</span>
+                    }
+    </td>
             <td>
                 @Html.DisplayFor(modelItem => item.VacationType.Name)
             </td>
