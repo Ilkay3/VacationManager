@@ -174,8 +174,12 @@ namespace VacationManager.Controllers
                                 && r.EndDate >= DateTime.Today);
 
                 if (leadOnLeave)
-                    return BadRequest("You are on leave. CEO must approve.");
+                {
+                    request.Status = "Pending CEO";
+                    await _context.SaveChangesAsync();
 
+                    return RedirectToAction(nameof(AllRequests));
+                }
                 request.Status = "Approved";
             }
 
@@ -184,22 +188,21 @@ namespace VacationManager.Controllers
             return RedirectToAction(nameof(AllRequests));
         }
 
-        //Reject
-        public async Task<IActionResult> Reject(int id)
-        {
-            var request = await _context.VacationRequests.FindAsync(id);
+		//Reject
+		public async Task<IActionResult> Reject(int id)
+		{
+			var request = await _context.VacationRequests.FindAsync(id);
 
-            if (request == null)
-                return NotFound();
+			if (request == null) return NotFound();
 
-            request.Status = "Rejected";
+			request.Status = "Rejected";
 
-            await _context.SaveChangesAsync();
+			await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(AllRequests));
-        }
+			return RedirectToAction(nameof(AllRequests));
+		}
 
-        [Authorize]
+		[Authorize]
         public async Task<IActionResult> AllRequests()
         {
             var user = await _userManager.GetUserAsync(User);

@@ -1,118 +1,194 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using VacationManager.Data;
 using VacationManager.Models;
 
-namespace VacationManager.Controllers
+[Authorize(Roles = "CEO")]
+public class UsersController : Controller
 {
-    [Authorize(Roles = "CEO")]
-    public class UsersController : Controller
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly VacationManagerDbContext _context;
+
+    public UsersController(
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager,
+        VacationManagerDbContext context)
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly VacationManagerDbContext _context;
+        _userManager = userManager;
+        _roleManager = roleManager;
+        _context = context;
+    }
 
-        public UsersController(UserManager<ApplicationUser> userManager, VacationManagerDbContext context)
+    // GET: Users
+    public async Task<IActionResult> Index(string search, string role, int page = 1, int pageSize = 10)
+    {
+        var users = await _userManager.Users.ToListAsync();
+
+        var filtered = new List<ApplicationUser>();
+
+        foreach (var user in users)
         {
-            _userManager = userManager;
-            _context = context;
-        }
+            var userRole = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
 
-        // 📄 List + Pagination + Search
-        public async Task<IActionResult> Index(string search, int page = 1, int pageSize = 10)
-        {
-            var query = _context.Users.Include(u => u.Team).AsQueryable();
+            // Филтър по текст
+            bool matchesSearch =
+                string.IsNullOrEmpty(search) ||
+                user.UserName.Contains(search) ||
+                user.FirstName.Contains(search) ||
+                user.LastName.Contains(search);
 
-            if (!string.IsNullOrEmpty(search))
+            // Филтър по роля
+            bool matchesRole =
+                string.IsNullOrEmpty(role) ||
+                userRole == role;
+
+            if (matchesSearch && matchesRole)
             {
-                query = query.Where(u =>
-                    u.UserName.Contains(search) ||
-                    u.FirstName.Contains(search) ||
-                    u.LastName.Contains(search));
+                filtered.Add(user);
             }
-
-            var users = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            return View(users);
         }
 
-        // 📄 Details
-        public async Task<IActionResult> Details(string id)
-        {
-            var user = await _context.Users
-                .Include(u => u.Team)
-                .FirstOrDefaultAsync(u => u.Id == id);
+        var result = filtered
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(u => new UserViewModel
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                TeamId = u.TeamId,
+                Role = _userManager.GetRolesAsync(u).Result.FirstOrDefault()
+            }).ToList();
 
+        ViewBag.Roles = new SelectList(await _roleManager.Roles.ToListAsync(), "Name", "Name", role);
+
+        ViewBag.Search = search;
+        ViewBag.SelectedRole = role;
+
+        ViewBag.PageSize = pageSize;
+        ViewBag.Page = page;
+        ViewBag.Total = filtered.Count;
+
+        return View(result);
+    }
+
+    // GET: Users/Edit/5
+    public async Task<IActionResult> Edit(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        var model = new UserViewModel
+        {
+            Id = user.Id,
+            Email = user.Email,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            TeamId = user.TeamId,
+            Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault()
+        };
+
+        ViewBag.Teams = new SelectList(_context.Teams, "Id", "Name", user.TeamId);
+        ViewBag.Roles = new SelectList(
+            await _roleManager.Roles.ToListAsync(),
+            "Name",
+            "Name",
+            model.Role
+        );
+        return View(model);
+    }
+
+    // POST: Users/Edit
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(string id, UserViewModel model)
+    {
+        if (id != model.Id) return NotFound();
+
+        if (ModelState.IsValid)
+        {
+            var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
-
-            return View(user);
-        }
-
-        // ➕ Create
-        public IActionResult Create()
-        {
-            ViewBag.Teams = _context.Teams.ToList();
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Create(ApplicationUser model, string password)
-        {
-            if (!ModelState.IsValid) return View(model);
-
-            var result = await _userManager.CreateAsync(model, password);
-
-            if (result.Succeeded)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
-            foreach (var error in result.Errors)
-                ModelState.AddModelError("", error.Description);
-
-            return View(model);
-        }
-
-        // ✏️ Edit
-        public async Task<IActionResult> Edit(string id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            ViewBag.Teams = _context.Teams.ToList();
-
-            return View(user);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Edit(ApplicationUser model)
-        {
-            if (!ModelState.IsValid) return View(model);
-
-            var user = await _context.Users.FindAsync(model.Id);
 
             user.FirstName = model.FirstName;
             user.LastName = model.LastName;
             user.TeamId = model.TeamId;
 
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        // ❌ Delete
-        public async Task<IActionResult> Delete(string id)
-        {
-            var user = await _context.Users.FindAsync(id);
-
-            if (user != null)
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
             {
-                await _userManager.DeleteAsync(user);
-            }
+                // Смяна на ролята
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                if (!string.IsNullOrEmpty(model.Role))
+                    await _userManager.AddToRoleAsync(user, model.Role);
 
-            return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
+            }
+            foreach (var error in result.Errors)
+                ModelState.AddModelError("", error.Description);
         }
+
+        ViewBag.Teams = new SelectList(_context.Teams, "Id", "Name", model.TeamId);
+        ViewBag.Roles = new SelectList(
+            await _roleManager.Roles.ToListAsync(),
+            "Name",
+            "Name",
+            model.Role
+        );
+        return View(model);
+    }
+
+    // GET: Users/Delete/5
+    public async Task<IActionResult> Delete(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        var model = new UserViewModel
+        {
+            Id = user.Id,
+            Email = user.Email,
+            FirstName = user.FirstName,
+            LastName = user.LastName
+        };
+        return View(model);
+    }
+
+    // POST: Users/Delete
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user != null)
+            await _userManager.DeleteAsync(user);
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    // GET: Users/Details/5
+    public async Task<IActionResult> Details(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        var model = new UserViewModel
+        {
+            Id = user.Id,
+            Email = user.Email,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            TeamId = user.TeamId,
+            Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault()
+        };
+
+        ViewBag.Teams = new SelectList(_context.Teams, "Id", "Name", model.TeamId);
+        return View(model);
     }
 }

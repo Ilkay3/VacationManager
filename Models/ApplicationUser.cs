@@ -15,12 +15,10 @@ namespace VacationManager.Models
 
         public string FullName => FirstName + " " + LastName;
 
-        // Team
         public int? TeamId { get; set; }
-        public Team Team { get; set; }
+        public Team? Team { get; set; }
 
-        // Ако е Team Lead
-        public Team LedTeam { get; set; }
+        public Team? LedTeam { get; set; }
 
         public ICollection<VacationRequest> VacationRequests { get; set; } = new List<VacationRequest>();
     }

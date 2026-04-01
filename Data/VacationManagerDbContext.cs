@@ -20,7 +20,8 @@ namespace VacationManager.Data
             base.OnModelCreating(builder);
 
             // ------------------------------
-            // TeamLead relation (1:1)
+            // Team → TeamLead (1:1)
+            // TeamLeadId е FK в Team, сочи към ApplicationUser
             // ------------------------------
             builder.Entity<Team>()
                 .HasOne(t => t.TeamLead)
@@ -30,6 +31,7 @@ namespace VacationManager.Data
 
             // ------------------------------
             // User → Team (many-to-1)
+            // TeamId е FK в ApplicationUser, сочи към Team
             // ------------------------------
             builder.Entity<ApplicationUser>()
                 .HasOne(u => u.Team)
@@ -93,5 +95,6 @@ namespace VacationManager.Data
 
             builder.Entity<IdentityRole>().HasData(roles);
         }
+        public DbSet<VacationManager.Models.UserViewModel> UserViewModel { get; set; } = default!;
     }
 }

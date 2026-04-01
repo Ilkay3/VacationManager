@@ -15,11 +15,11 @@ namespace VacationManager.Models
         public int? ProjectId { get; set; }
         public Project Project { get; set; }
 
-        // Team Lead
-        public string TeamLeadId { get; set; }
-        public ApplicationUser TeamLead { get; set; }
+        // Team Lead (1 към 1)
+        public string? TeamLeadId { get; set; }
+        public ApplicationUser? TeamLead { get; set; }
 
-        // Members
-        public ICollection<ApplicationUser> Members { get; set; }
+        // Members (1 към много)
+        public ICollection<ApplicationUser> Members { get; set; } = new List<ApplicationUser>();
     }
 }

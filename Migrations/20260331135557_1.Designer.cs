@@ -12,8 +12,8 @@ using VacationManager.Data;
 namespace VacationManager.Migrations
 {
     [DbContext(typeof(VacationManagerDbContext))]
-    [Migration("20260326144819_3")]
-    partial class _3
+    [Migration("20260331135557_1")]
+    partial class _1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -306,7 +306,6 @@ namespace VacationManager.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("TeamLeadId")
-                        .IsRequired()
                         .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
@@ -334,12 +333,7 @@ namespace VacationManager.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("IsHalfDay")
                         .HasColumnType("tinyint(1)");
@@ -347,8 +341,11 @@ namespace VacationManager.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("Status")
                         .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
                         .HasColumnType("varchar(255)");
 
                     b.Property<int>("VacationTypeId")
@@ -452,7 +449,7 @@ namespace VacationManager.Migrations
             modelBuilder.Entity("VacationManager.Models.ApplicationUser", b =>
                 {
                     b.HasOne("VacationManager.Models.Team", "Team")
-                        .WithMany("Developers")
+                        .WithMany("Members")
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -469,8 +466,7 @@ namespace VacationManager.Migrations
                     b.HasOne("VacationManager.Models.ApplicationUser", "TeamLead")
                         .WithOne("LedTeam")
                         .HasForeignKey("VacationManager.Models.Team", "TeamLeadId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Project");
 
@@ -482,8 +478,7 @@ namespace VacationManager.Migrations
                     b.HasOne("VacationManager.Models.ApplicationUser", "User")
                         .WithMany("VacationRequests")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("VacationManager.Models.VacationType", "VacationType")
                         .WithMany("VacationRequests")
@@ -498,8 +493,7 @@ namespace VacationManager.Migrations
 
             modelBuilder.Entity("VacationManager.Models.ApplicationUser", b =>
                 {
-                    b.Navigation("LedTeam")
-                        .IsRequired();
+                    b.Navigation("LedTeam");
 
                     b.Navigation("VacationRequests");
                 });
@@ -511,7 +505,7 @@ namespace VacationManager.Migrations
 
             modelBuilder.Entity("VacationManager.Models.Team", b =>
                 {
-                    b.Navigation("Developers");
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("VacationManager.Models.VacationType", b =>

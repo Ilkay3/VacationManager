@@ -116,9 +116,9 @@ namespace VacationManager.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "varchar(255)", nullable: false)
+                    LoginProvider = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ProviderKey = table.Column<string>(type: "varchar(255)", nullable: false)
+                    ProviderKey = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ProviderDisplayName = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -198,9 +198,9 @@ namespace VacationManager.Migrations
                 {
                     UserId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    LoginProvider = table.Column<string>(type: "varchar(255)", nullable: false)
+                    LoginProvider = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Name = table.Column<string>(type: "varchar(255)", nullable: false)
+                    Name = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Value = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
@@ -226,7 +226,7 @@ namespace VacationManager.Migrations
                     Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ProjectId = table.Column<int>(type: "int", nullable: true),
-                    TeamLeadId = table.Column<string>(type: "varchar(255)", nullable: false)
+                    TeamLeadId = table.Column<string>(type: "varchar(255)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -257,11 +257,12 @@ namespace VacationManager.Migrations
                     EndDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime", nullable: false),
                     IsHalfDay = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsApproved = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    VacationTypeId = table.Column<int>(type: "int", nullable: false),
-                    FilePath = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                    Status = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    UserId = table.Column<string>(type: "varchar(255)", nullable: false)
+                    VacationTypeId = table.Column<int>(type: "int", nullable: false),
+                    FilePath = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UserId = table.Column<string>(type: "varchar(255)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -289,7 +290,8 @@ namespace VacationManager.Migrations
                 {
                     { "1", null, "CEO", "CEO" },
                     { "2", null, "Team Lead", "TEAM LEAD" },
-                    { "3", null, "Developer", "DEVELOPER" }
+                    { "3", null, "Unassigned", "UNASSIGNED" },
+                    { "4", null, "Developer", "DEVELOPER" }
                 });
 
             migrationBuilder.InsertData(

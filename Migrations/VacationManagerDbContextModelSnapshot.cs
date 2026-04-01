@@ -303,7 +303,6 @@ namespace VacationManager.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("TeamLeadId")
-                        .IsRequired()
                         .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
@@ -314,6 +313,37 @@ namespace VacationManager.Migrations
                         .IsUnique();
 
                     b.ToTable("Teams");
+                });
+
+            modelBuilder.Entity("VacationManager.Models.UserViewModel", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("TeamId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserViewModel");
                 });
 
             modelBuilder.Entity("VacationManager.Models.VacationRequest", b =>
@@ -464,8 +494,7 @@ namespace VacationManager.Migrations
                     b.HasOne("VacationManager.Models.ApplicationUser", "TeamLead")
                         .WithOne("LedTeam")
                         .HasForeignKey("VacationManager.Models.Team", "TeamLeadId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Project");
 
@@ -492,8 +521,7 @@ namespace VacationManager.Migrations
 
             modelBuilder.Entity("VacationManager.Models.ApplicationUser", b =>
                 {
-                    b.Navigation("LedTeam")
-                        .IsRequired();
+                    b.Navigation("LedTeam");
 
                     b.Navigation("VacationRequests");
                 });
