@@ -1,48 +1,85 @@
-﻿@model IEnumerable<VacationManager.Models.VacationRequest>
+﻿@model IEnumerable<VacationRequest>
 
 @{
     ViewData["Title"] = "All Vacation Requests";
 }
 
-<h2>All Vacation Requests</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">All Vacation Requests</h1>
+</div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>User</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Type</th>
-            <th>Approved</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <form method="get" class="mb-4">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Created from date</label>
+                    <input type="date" name="fromDate" class="form-control" value="@ViewBag.FromDate" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel"></i> Filter</button>
+                </div>
+            </div>
+        </form>
 
-    <tbody>
-        @foreach (var v in Model)
-        {
-                <tr>
-                    <td>@v.User?.Email</td>
-                    <td>@v.StartDate.ToShortDateString()</td>
-                    <td>@v.EndDate.ToShortDateString()</td>
-                    <td>@v.VacationType?.Name</td>
-                        <td>@v.Status </td>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var v in Model)
+                    {
+                            <tr>
+                                <td>@v.User?.Email</td>
+                                <td>@v.StartDate.ToShortDateString()</td>
+                                <td>@v.EndDate.ToShortDateString()</td>
+                                <td>@v.VacationType?.Name</td>
+                                <td>
+                                @if (v.Status == "Approved")
+                                {
+                                            <span class="badge bg-success">Approved</span>
+                                }
+                                else if (v.Status == "Rejected")
+                                {
+                                            <span class="badge bg-danger">Rejected</span>
+                                }
+                                else if (v.Status == "Pending CEO")
+                                {
+                                            <span class="badge bg-info text-dark">Pending CEO</span>
+                                }
+                                else
+                                {
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                                </td>
+                                <td class="text-end">
+                                @if (v.Status != "Approved")
+                                {
+                                    if (User.IsInRole("CEO") || User.IsInRole("Team Lead"))
+                                    {
+                                                    <a asp-action="Approve" asp-route-id="@v.Id" class="btn btn-sm btn-success">
+                                                        <i class="bi bi-check-lg"></i> Approve
+                                                    </a>
+                                                    <a asp-action="Reject" asp-route-id="@v.Id" class="btn btn-sm btn-outline-danger">
+                                                        <i class="bi bi-x-lg"></i> Reject
+                                                    </a>
+                                    }
+                                }
+                                </td>
+                            </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-    <td>
-                    @if (v.Status == "Approved")
-                    {
-                <span class="badge bg-success">Approved</span>
-                    }
-                    else if (v.Status == "Rejected")
-                    {
-                <span class="badge bg-danger">Rejected</span>
-                    }
-                    else
-                    {
-                <span class="badge bg-warning text-dark">Pending</span>
-                    }
-    </td>
-                </tr>
-        }
-    </tbody>
-</table>
+        @await Html.PartialAsync("_Pagination")
+    </div>
+</div>

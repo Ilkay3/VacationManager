@@ -27,14 +27,23 @@ namespace VacationManager.Controllers
         }
 
         // MY REQUESTS (вместо Index)
-        public async Task<IActionResult> MyRequests()
+        public async Task<IActionResult> MyRequests(int page = 1, int pageSize = 10)
         {
             var user = await _userManager.GetUserAsync(User);
-
-            var requests = await _context.VacationRequests
+            var query = _context.VacationRequests
                 .Where(r => r.UserId == user.Id)
-                .Include(r => r.VacationType)
+                .Include(r => r.VacationType);
+
+            var total = await query.CountAsync();
+            var requests = await query
+                .OrderByDescending(r => r.CreatedOn)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.Total = total;
 
             return View(requests);
         }
@@ -125,7 +134,7 @@ namespace VacationManager.Controllers
 
             model.UserId = user.Id;
             model.CreatedOn = DateTime.UtcNow;
-            model.Status = "Rejected";
+            model.Status = "Pending";
 
             _context.Add(model);
             await _context.SaveChangesAsync();
@@ -151,6 +160,7 @@ namespace VacationManager.Controllers
 
             var isCEO = await _userManager.IsInRoleAsync(currentUser, "CEO");
 
+            // CEO винаги може да одобрява
             if (isCEO)
             {
                 request.Status = "Approved";
@@ -162,25 +172,26 @@ namespace VacationManager.Controllers
                 if (!isTeamLead)
                     return Forbid();
 
-                // 🔥 ключовата проверка
+                // Team Lead може само за своя team
                 if (request.User?.TeamId != currentUser.TeamId)
                     return Forbid();
 
-                // ако Team Lead е в отпуск
+                // Проверка дали Team Lead е в отпуск
                 var leadOnLeave = await _context.VacationRequests
                     .AnyAsync(r => r.UserId == currentUser.Id
                                 && r.Status == "Approved"
                                 && r.StartDate <= DateTime.Today
                                 && r.EndDate >= DateTime.Today);
 
+                // ТУК Е КЛЮЧОВАТА ПРОМЯНА
                 if (leadOnLeave)
                 {
-                    request.Status = "Pending CEO";
-                    await _context.SaveChangesAsync();
-
-                    return RedirectToAction(nameof(AllRequests));
+                    request.Status = "Pending CEO"; // прехвърля се към CEO
                 }
-                request.Status = "Approved";
+                else
+                {
+                    request.Status = "Approved";
+                }
             }
 
             await _context.SaveChangesAsync();
@@ -188,8 +199,8 @@ namespace VacationManager.Controllers
             return RedirectToAction(nameof(AllRequests));
         }
 
-		//Reject
-		public async Task<IActionResult> Reject(int id)
+        //Reject
+        public async Task<IActionResult> Reject(int id)
 		{
 			var request = await _context.VacationRequests.FindAsync(id);
 
@@ -202,19 +213,11 @@ namespace VacationManager.Controllers
 			return RedirectToAction(nameof(AllRequests));
 		}
 
-		[Authorize]
-        public async Task<IActionResult> AllRequests()
+        [Authorize]
+        public async Task<IActionResult> AllRequests(DateTime? fromDate, int page = 1, int pageSize = 10)
         {
             var user = await _userManager.GetUserAsync(User);
-
-            if (user == null)
-                return Unauthorized();
-
             var isCEO = await _userManager.IsInRoleAsync(user, "CEO");
-            var isTeamLead = await _userManager.IsInRoleAsync(user, "Team Lead");
-
-            if (!isCEO && !isTeamLead)
-                return Forbid();
 
             IQueryable<VacationRequest> query = _context.VacationRequests
                 .Include(r => r.User)
@@ -223,14 +226,28 @@ namespace VacationManager.Controllers
 
             if (!isCEO)
             {
-                // Team Lead вижда само своя team
                 query = query.Where(r => r.User.TeamId == user.TeamId);
             }
+            if (fromDate.HasValue)
+            {
+                query = query.Where(r => r.CreatedOn >= fromDate.Value);
+            }
 
-            var requests = await query.ToListAsync();
+            var total = await query.CountAsync();
+            var requests = await query
+                .OrderByDescending(r => r.CreatedOn)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.Total = total;
 
             return View(requests);
         }
+
         //On leave
         public async Task<IActionResult> OnLeave()
         {

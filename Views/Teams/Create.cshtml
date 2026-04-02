@@ -1,41 +1,46 @@
-﻿@model VacationManager.Models.Team
+﻿@model Team
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Team";
 }
 
-<h1>Create</h1>
-
-<h4>Team</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h2 class="h4 mb-3">Create Team</h2>
+                <hr />
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ProjectId" class="form-label"></label>
+                        <select asp-for="ProjectId" class="form-select" asp-items="ViewBag.ProjectId">
+                            <option value="">-- Select Project --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="TeamLeadId" class="form-label"></label>
+                        <select asp-for="TeamLeadId" class="form-select" asp-items="ViewBag.TeamLeadId">
+                            <option value="">-- Select Team Lead --</option>
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label asp-for="ProjectId" class="control-label"></label>
-                <select asp-for="ProjectId" class ="form-control" asp-items="ViewBag.ProjectId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="TeamLeadId" class="control-label"></label>
-                <select asp-for="TeamLeadId" class ="form-control" asp-items="ViewBag.TeamLeadId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

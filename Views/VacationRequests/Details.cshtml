@@ -1,66 +1,67 @@
-﻿@model VacationManager.Models.VacationRequest
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@model VacationRequest
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Vacation Request Details";
 }
 
-<h1>Details</h1>
-
-<div>
-    <h4>VacationRequest</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StartDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StartDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EndDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EndDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedOn)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedOn)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsHalfDay)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsHalfDay)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.VacationType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.VacationType.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FilePath)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FilePath)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Id)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h2 class="h4 mb-3">Vacation Request Details</h2>
+                <hr />
+                <dl class="row">
+                    <dt class="col-sm-3">User</dt>
+                    <dd class="col-sm-9">@Model.User?.Email</dd>
+                    <dt class="col-sm-3">Start Date</dt>
+                    <dd class="col-sm-9">@Model.StartDate.ToShortDateString()</dd>
+                    <dt class="col-sm-3">End Date</dt>
+                    <dd class="col-sm-9">@Model.EndDate.ToShortDateString()</dd>
+                    <dt class="col-sm-3">Created On</dt>
+                    <dd class="col-sm-9">@Model.CreatedOn.ToLocalTime().ToString("g")</dd>
+                    <dt class="col-sm-3">Half Day</dt>
+                    <dd class="col-sm-9">@(Model.IsHalfDay ? "Yes" : "No")</dd>
+                    <dt class="col-sm-3">Status</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.Status == "Approved")
+                        {
+                                <span class="badge bg-success">Approved</span>
+                        }
+                        else if (Model.Status == "Rejected")
+                        {
+                                <span class="badge bg-danger">Rejected</span>
+                        }
+                        else if (Model.Status == "Pending CEO")
+                        {
+                                <span class="badge bg-info text-dark">Pending CEO</span>
+                        }
+                        else
+                        {
+                                <span class="badge bg-warning text-dark">Pending</span>
+                        }
+                    </dd>
+                    <dt class="col-sm-3">Vacation Type</dt>
+                    <dd class="col-sm-9">@Model.VacationType?.Name</dd>
+                    @if (Model.FilePath != null)
+                    {
+                            <dt class="col-sm-3">Attachment</dt>
+                            <dd class="col-sm-9">
+                                <a href="@Model.FilePath" target="_blank" class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            </dd>
+                    }
+                </dl>
+                <div class="d-flex justify-content-between">
+                    <a asp-action="MyRequests" class="btn btn-outline-secondary">Back to My Requests</a>
+                    @if (Model.Status != "Approved" && Model.UserId == UserManager.GetUserId(User))
+                    {
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Edit</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

@@ -1,8 +1,63 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-gradient-hero rounded-4 mb-5">
+    <div class="col-md-8 mx-auto my-5">
+        <h1 class="display-3 fw-bold mb-4">Vacation Manager</h1>
+        <p class="lead mb-4">Управлявайте отпуските, екипите и проектите лесно и ефективно.</p>
+        @if (!User.Identity.IsAuthenticated)
+        {
+                <div class="d-flex justify-content-center gap-3">
+                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary btn-lg px-4">Вход</a>
+                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-light btn-lg px-4">Регистрация</a>
+                </div>
+        }
+        else
+        {
+                <div class="d-flex justify-content-center gap-3">
+                    <a asp-controller="VacationRequests" asp-action="Create" class="btn btn-primary btn-lg px-4">Нова заявка</a>
+                    <a asp-controller="VacationRequests" asp-action="MyRequests" class="btn btn-outline-light btn-lg px-4">Моите заявки</a>
+                </div>
+        }
+    </div>
 </div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card h-100 text-center border-0 shadow-sm">
+            <div class="card-body">
+                <div class="display-1 mb-3">📋</div>
+                <h5 class="card-title">Заявки за отпуск</h5>
+                <p class="card-text text-muted">Платени, неплатени и болнични. Качване на документи.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 text-center border-0 shadow-sm">
+            <div class="card-body">
+                <div class="display-1 mb-3">👥</div>
+                <h5 class="card-title">Екипи и проекти</h5>
+                <p class="card-text text-muted">Организирайте служителите, задайте лидери.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 text-center border-0 shadow-sm">
+            <div class="card-body">
+                <div class="display-1 mb-3">✅</div>
+                <h5 class="card-title">Йерархични одобрения</h5>
+                <p class="card-text text-muted">Team Lead одобрява, CEO има пълен контрол.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (User.Identity.IsAuthenticated && (User.IsInRole("CEO") || User.IsInRole("Team Lead")))
+{
+        <div class="row mt-5">
+            <div class="col text-center">
+                <a asp-controller="VacationRequests" asp-action="AllRequests" class="btn btn-outline-primary btn-lg">Преглед на всички заявки</a>
+            </div>
+        </div>
+}

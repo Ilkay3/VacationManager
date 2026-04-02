@@ -1,25 +1,37 @@
-﻿@model IEnumerable<VacationManager.Models.VacationRequest>
+﻿@model IEnumerable<VacationRequest>
 
-<h2>Users Currently On Leave</h2>
+@{
+    ViewData["Title"] = "On Leave";
+}
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>User</th>
-            <th>Type</th>
-            <th>From</th>
-            <th>To</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var v in Model)
-        {
-                <tr>
-                    <td>@v.User?.Email</td>
-                    <td>@v.VacationType?.Name</td>
-                    <td>@v.StartDate.ToShortDateString()</td>
-                    <td>@v.EndDate.ToShortDateString()</td>
-                </tr>
-        }
-    </tbody>
-</table>
+<div class="mb-4">
+    <h1 class="h3 mb-0">Users Currently On Leave</h1>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Type</th>
+                        <th>From</th>
+                        <th>To</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var v in Model)
+                    {
+                            <tr>
+                                <td>@v.User?.Email</td>
+                                <td>@v.VacationType?.Name</td>
+                                <td>@v.StartDate.ToShortDateString()</td>
+                                <td>@v.EndDate.ToShortDateString()</td>
+                            </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

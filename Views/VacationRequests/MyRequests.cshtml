@@ -4,56 +4,68 @@
     ViewData["Title"] = "My Vacation Requests";
 }
 
-<h2>My Vacation Requests</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">My Vacation Requests</h1>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Request</a>
+</div>
 
-<a asp-action="Create" class="btn btn-primary mb-3">New Request</a>
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Type</th>
+                        <th>Half Day</th>
+                        <th>Status</th>
+                        <th>File</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var v in Model)
+                    {
+                            <tr>
+                                <td>@v.StartDate.ToShortDateString()</td>
+                                <td>@v.EndDate.ToShortDateString()</td>
+                                <td>@v.VacationType?.Name</td>
+                                <td>@(v.IsHalfDay ? "Yes" : "No")</td>
+                                <td>
+                                @if (v.Status == "Pending")
+                                {
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                                else if (v.Status == "Approved")
+                                {
+                                            <span class="badge bg-success">Approved</span>
+                                }
+                                else if (v.Status == "Rejected")
+                                {
+                                            <span class="badge bg-danger">Rejected</span>
+                                }
+                                else if (v.Status == "Pending CEO")
+                                {
+                                            <span class="badge bg-info text-dark">Pending CEO</span>
+                                }
+                                </td>
+                                <td>
+                                @if (v.FilePath != null)
+                                {
+                                            <a href="@v.FilePath" target="_blank" class="btn btn-sm btn-outline-info"><i class="bi bi-download"></i> Download</a>
+                                }
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="Edit" asp-route-id="@v.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Edit</a>
+                                    <a asp-action="Delete" asp-route-id="@v.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</a>
+                                </td>
+                            </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Start</th>
-            <th>End</th>
-            <th>Type</th>
-            <th>Half Day</th>
-            <th>Approved</th>
-            <th>File</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        @foreach (var v in Model)
-        {
-                <tr>
-                    <td>@v.StartDate.ToShortDateString()</td>
-                    <td>@v.EndDate.ToShortDateString()</td>
-                    <td>@v.VacationType?.Name</td>
-                    <td>@(v.IsHalfDay ? "Yes" : "No")</td>
-    <td>
-                    @if (v.Status == "Pending")
-                    {
-                <span class="text-warning">Pending</span>
-                    }
-                    else if (v.Status == "Approved")
-                    {
-                <span class="text-success">Approved</span>
-                    }
-                    else if (v.Status == "Rejected")
-                    {
-                <span class="text-danger">Rejected</span>
-                    }
-    </td>
-                    <td>
-                    @if (v.FilePath != null)
-                    {
-                                <a href="@v.FilePath" target="_blank">Download</a>
-                    }
-                    </td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@v.Id">Edit</a> |
-                        <a asp-action="Delete" asp-route-id="@v.Id">Delete</a>
-                    </td>
-                </tr>
-        }
-    </tbody>
-</table>
+        @await Html.PartialAsync("_Pagination")
+    </div>
+</div>

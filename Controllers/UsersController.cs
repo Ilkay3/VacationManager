@@ -175,7 +175,11 @@ public class UsersController : Controller
     // GET: Users/Details/5
     public async Task<IActionResult> Details(string id)
     {
-        var user = await _userManager.FindByIdAsync(id);
+        // Зареждаме потребителя заедно с неговия екип
+        var user = await _userManager.Users
+            .Include(u => u.Team)
+            .FirstOrDefaultAsync(u => u.Id == id);
+
         if (user == null) return NotFound();
 
         var model = new UserViewModel
@@ -188,6 +192,7 @@ public class UsersController : Controller
             Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault()
         };
 
+        ViewBag.TeamName = user.Team?.Name ?? "No team";
         ViewBag.Teams = new SelectList(_context.Teams, "Id", "Name", model.TeamId);
         return View(model);
     }

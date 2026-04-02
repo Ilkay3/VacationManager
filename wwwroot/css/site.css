@@ -1,22 +1,252 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+:root {
+    --primary: #60a5fa;
+    --primary-dark: #3b82f6;
+    --primary-light: #1e293b;
+    --accent: #c084fc;
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --gray-50: #0f172a;
+    --gray-100: #1e293b;
+    --gray-200: #334155;
+    --gray-500: #94a3b8;
+    --gray-700: #cbd5e1;
+    --gray-900: #f8fafc;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+    --radius-md: 0.5rem;
 }
 
 body {
-  margin-bottom: 60px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #0f172a;
+    color: #f1f5f9;
+    line-height: 1.5;
+    min-height: 100vh;
 }
+
+/* Навигация – тъмна */
+.navbar {
+    background-color: #0f172a;
+    box-shadow: var(--shadow-sm);
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--primary);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent !important;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--gray-500) !important;
+    transition: color 0.2s;
+}
+
+    .nav-link:hover {
+        color: var(--primary) !important;
+    }
+
+/* Карти – тъмни, с цветна горна граница */
+.card {
+    background-color: var(--gray-100);
+    border: none;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-top: 3px solid var(--primary);
+}
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+.card-header {
+    background-color: var(--gray-100);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+/* Специални класове за статистики в Dashboard */
+.card-stats {
+    border-top: 3px solid;
+}
+
+.card-total {
+    border-top-color: var(--primary);
+}
+
+.card-approved {
+    border-top-color: var(--success);
+}
+
+.card-pending {
+    border-top-color: var(--warning);
+}
+
+.card-rejected {
+    border-top-color: var(--danger);
+}
+
+/* Таблици – тъмни */
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-striped-bg: var(--gray-200);
+    --bs-table-hover-bg: rgba(96,165,250,0.1);
+    color: var(--gray-700);
+}
+
+    .table > :not(caption) > * > * {
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .table thead th {
+        background-color: var(--gray-100);
+        border-bottom-width: 1px;
+        font-weight: 600;
+        color: var(--gray-500);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+
+    .table tbody tr:hover {
+        background-color: var(--bs-table-hover-bg);
+    }
+
+/* Форми – тъмни */
+.form-control, .form-select {
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    color: var(--gray-700);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(96,165,250,0.25);
+        background-color: var(--gray-100);
+        color: var(--gray-900);
+    }
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: var(--gray-500);
+}
+
+/* Бутони – градиент */
+.btn {
+    border-radius: 0.375rem;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    border: none;
+    color: white;
+}
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent) 100%);
+        transform: scale(1.02);
+        box-shadow: var(--shadow-md);
+    }
+
+.btn-outline-primary {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary);
+        color: white;
+    }
+
+.btn-outline-secondary {
+    border-color: var(--gray-500);
+    color: var(--gray-500);
+}
+
+    .btn-outline-secondary:hover {
+        background-color: var(--gray-500);
+        color: var(--gray-900);
+    }
+
+/* Странициране */
+.pagination {
+    --bs-pagination-color: var(--gray-500);
+    --bs-pagination-hover-color: var(--primary);
+    --bs-pagination-hover-bg: var(--gray-100);
+    --bs-pagination-focus-box-shadow: none;
+    --bs-pagination-active-bg: var(--primary);
+    --bs-pagination-active-border-color: var(--primary);
+}
+
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        border-color: transparent;
+        color: white;
+    }
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Footer – тъмен */
+.footer {
+    margin-top: 3rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--gray-200);
+    color: var(--gray-500);
+    font-size: 0.875rem;
+    background-color: #0f172a;
+}
+
+/* Избор на брой резултати */
+.form-select-sm.w-auto {
+    width: auto;
+    min-width: 70px;
+}
+
+/* Допълнителни корекции за линкове */
+a:not(.btn):not(.nav-link):not(.dropdown-item) {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+    a:not(.btn):not(.nav-link):not(.dropdown-item):hover {
+        color: var(--accent);
+        text-decoration: underline;
+    }
+
+/* Dropdown менюта в тъмна тема */
+.dropdown-menu {
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-200);
+}
+
+.dropdown-item {
+    color: var(--gray-700);
+}
+
+    .dropdown-item:hover {
+        background-color: var(--gray-200);
+        color: var(--primary);
+    }

@@ -32,7 +32,22 @@ namespace VacationManager.Controllers
 			return View();
 		}
 
-		public IActionResult Privacy()
+        public async Task<IActionResult> Dashboard()
+        {
+            var totalRequests = await _context.VacationRequests.CountAsync();
+            var approved = await _context.VacationRequests.CountAsync(r => r.Status == "Approved");
+            var pending = await _context.VacationRequests.CountAsync(r => r.Status == "Pending");
+            var rejected = await _context.VacationRequests.CountAsync(r => r.Status == "Rejected");
+
+            ViewBag.Total = totalRequests;
+            ViewBag.Approved = approved;
+            ViewBag.Pending = pending;
+            ViewBag.Rejected = rejected;
+
+            return View();
+        }
+
+        public IActionResult Privacy()
 		{
 			return View();
 		}

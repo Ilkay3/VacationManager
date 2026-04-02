@@ -2,21 +2,34 @@
     ViewData["Title"] = "Assign User to Team";
 }
 
-<h2>Assign User to Team</h2>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h2 class="h4 mb-3">Assign User to Team</h2>
+                <p class="text-muted">Select a user and a team to assign the user to that team.</p>
+                <hr />
+                <form asp-action="AssignUser" method="post">
+                    <div class="mb-3">
+                        <label class="form-label"><i class="bi bi-person"></i> User</label>
+                        <select name="userId" class="form-select" asp-items="ViewBag.Users">
+                            <option value="">-- Select User --</option>
+                        </select>
+                    </div>
 
-<form asp-action="AssignUser" method="post">
+                    <div class="mb-3">
+                        <label class="form-label"><i class="bi bi-people"></i> Team</label>
+                        <select name="teamId" class="form-select" asp-items="ViewBag.Teams">
+                            <option value="">-- Select Team --</option>
+                        </select>
+                    </div>
 
-    <div class="mb-3">
-        <label>User</label>
-        <select name="userId" class="form-control" asp-items="ViewBag.Users"></select>
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Assign</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label>Team</label>
-        <select name="teamId" class="form-control" asp-items="ViewBag.Teams"></select>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Assign</button>
-    <a asp-action="Teams" class="btn btn-secondary">Back</a>
-
-</form>
+</div>

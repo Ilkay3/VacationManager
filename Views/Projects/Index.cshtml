@@ -1,29 +1,58 @@
 ﻿@model IEnumerable<Project>
 
-<h2>Projects</h2>
+@{
+    ViewData["Title"] = "Projects";
+}
 
-<a asp-action="Create" class="btn btn-primary">New Project</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Projects</h1>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Project</a>
+</div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th></th>
-        </tr>
-    </thead>
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <form method="get" class="mb-4">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <input type="text" name="search" class="form-control" placeholder="Search by name or description..." value="@ViewBag.Search" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Filter</button>
+                </div>
+            </div>
+        </form>
 
-    <tbody>
-        @foreach (var p in Model)
-        {
-                <tr>
-                    <td>@p.Name</td>
-                    <td>@p.Description</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@p.Id">Edit</a> |
-                        <a asp-action="Delete" asp-route-id="@p.Id">Delete</a>
-                    </td>
-                </tr>
-        }
-    </tbody>
-</table>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                            <tr>
+                                <td>@p.Name</td>
+                                <td>@p.Description</td>
+    <td>
+        <a asp-action="Details" asp-route-id="@p.Id">Details</a>
+                                @if (User.IsInRole("CEO"))
+                                {
+                                    <text> | </text>
+                <a asp-action="Edit" asp-route-id="@p.Id">Edit</a>
+                                    <text> | </text>
+                <a asp-action="Delete" asp-route-id="@p.Id">Delete</a>
+                                }
+    </td>
+                            </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @await Html.PartialAsync("_Pagination")
+    </div>
+</div>

@@ -1,0 +1,70 @@
+﻿@{
+    int currentPage = ViewBag.Page ?? 1;
+    int pageSize = ViewBag.PageSize ?? 10;
+    int total = ViewBag.Total ?? 0;
+    int totalPages = (int)Math.Ceiling((double)total / pageSize);
+    var pageSizeOptions = new[] { 10, 25, 50 };
+}
+
+@if (totalPages > 1)
+{
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center flex-wrap">
+                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-route-page="1" asp-route-pageSize="@pageSize">Първа</a>
+                </li>
+                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize">Предишна</a>
+                </li>
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                if (i == currentPage)
+                {
+                                <li class="page-item active"><span class="page-link">@i</span></li>
+                }
+                else if (Math.Abs(i - currentPage) <= 2 || i == 1 || i == totalPages)
+                {
+                                <li class="page-item"><a class="page-link" asp-route-page="@i" asp-route-pageSize="@pageSize">@i</a></li>
+                }
+                else if (i == currentPage - 3 || i == currentPage + 3)
+                {
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                }
+            }
+                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                    <a class="page-link" asp-route-page="@(currentPage + 1)" asp-route-pageSize="@pageSize">Следваща</a>
+                </li>
+                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                    <a class="page-link" asp-route-page="@totalPages" asp-route-pageSize="@pageSize">Последна</a>
+                </li>
+            </ul>
+        </nav>
+}
+
+<div class="row mt-3 align-items-center">
+    <div class="col-sm-6 mb-2 mb-sm-0">
+        <span>Показване на @(((currentPage - 1) * pageSize) + 1) – @(Math.Min(currentPage * pageSize, total)) от @total записа</span>
+    </div>
+    <div class="col-sm-6 text-sm-end">
+        <form method="get" class="d-inline-flex align-items-center gap-2">
+            <label class="mb-0">Резултати на страница:</label>
+            <select name="pageSize" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                @foreach (var size in pageSizeOptions)
+                {
+                        <option value="@size" selected="@(pageSize == size)">@size</option>
+                }
+            </select>
+            <input type="hidden" name="page" value="1" />
+            @{
+                var query = Context.Request.Query;
+                foreach (var key in query.Keys)
+                {
+                    if (key != "pageSize" && key != "page")
+                    {
+                                    <input type="hidden" name="@key" value="@query[key]" />
+                    }
+                }
+            }
+        </form>
+    </div>
+</div>

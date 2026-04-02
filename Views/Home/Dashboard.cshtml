@@ -1,11 +1,81 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Dashboard";
 }
 
-<h2>Dashboard</h2>
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-5 fw-normal">Dashboard</h1>
+        <p class="text-muted">Overview of vacation requests</p>
+    </div>
+</div>
 
-<p>Total Requests: @ViewBag.Total</p>
-<p>Approved: @ViewBag.Approved</p>
-<p>Pending: @ViewBag.Pending</p>
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="card h-100 shadow-sm border-0 card-stats card-total">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h5 class="card-title text-muted mb-2">Total Requests</h5>
+                    <i class="bi bi-calendar-check fs-4 text-primary"></i>
+                </div>
+                <p class="display-4 fw-bold mb-0">@ViewBag.Total</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 shadow-sm border-0 card-stats card-approved">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h5 class="card-title text-muted mb-2">Approved</h5>
+                    <i class="bi bi-check-circle fs-4 text-success"></i>
+                </div>
+                <p class="display-4 fw-bold text-success mb-0">@ViewBag.Approved</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 shadow-sm border-0 card-stats card-pending">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h5 class="card-title text-muted mb-2">Pending</h5>
+                    <i class="bi bi-clock-history fs-4 text-warning"></i>
+                </div>
+                <p class="display-4 fw-bold text-warning mb-0">@ViewBag.Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 shadow-sm border-0 card-stats card-rejected">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h5 class="card-title text-muted mb-2">Rejected</h5>
+                    <i class="bi bi-x-circle fs-4 text-danger"></i>
+                </div>
+                <p class="display-4 fw-bold text-danger mb-0">@ViewBag.Rejected</p>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="row mt-5">
+    <div class="col">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <h5 class="mb-0"><i class="bi bi-lightning-charge me-2 text-primary"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <a asp-controller="VacationRequests" asp-action="Create" class="btn btn-primary me-2">
+                    <i class="bi bi-plus-lg"></i> New Request
+                </a>
+                <a asp-controller="VacationRequests" asp-action="MyRequests" class="btn btn-outline-secondary">
+                    <i class="bi bi-list-ul"></i> My Requests
+                </a>
+                @if (User.IsInRole("CEO") || User.IsInRole("Team Lead"))
+                {
+                        <a asp-controller="VacationRequests" asp-action="AllRequests" class="btn btn-outline-secondary ms-2">
+                            <i class="bi bi-people"></i> All Requests
+                        </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

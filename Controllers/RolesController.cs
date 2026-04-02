@@ -1,23 +1,35 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using VacationManager.Models;
 
 namespace VacationManager.Controllers
 {
     [Authorize(Roles = "CEO")]
     public class RolesController : Controller
     {
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public RolesController(RoleManager<IdentityRole> roleManager)
+        public RolesController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
         {
             _roleManager = roleManager;
+            _userManager = userManager;
         }
 
         // LIST
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(_roleManager.Roles);
+            var roles = await _roleManager.Roles.ToListAsync();
+            var userCounts = new Dictionary<string, int>();
+            foreach (var role in roles)
+            {
+                var usersInRole = await _userManager.GetUsersInRoleAsync(role.Name);
+                userCounts[role.Name] = usersInRole.Count();
+            }
+            ViewBag.UserCounts = userCounts;
+            return View(roles);
         }
 
         // CREATE GET

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -12,7 +8,7 @@ using VacationManager.Models;
 
 namespace VacationManager.Controllers
 {
-    [Authorize(Roles = "CEO")]
+    [Authorize]
     public class TeamsController : Controller
     {
         private readonly VacationManagerDbContext _context;
@@ -24,30 +20,49 @@ namespace VacationManager.Controllers
             _userManager = userManager;
         }
 
-        // GET: Teams
-        public async Task<IActionResult> Index()
+        // ✅ INDEX → CEO + Team Lead
+        [Authorize(Roles = "CEO,Team Lead")]
+        public async Task<IActionResult> Index(string search, string project, int page = 1, int pageSize = 10)
         {
             var user = await _userManager.GetUserAsync(User);
-
             var isCEO = await _userManager.IsInRoleAsync(user, "CEO");
-            var isTeamLead = await _userManager.IsInRoleAsync(user, "Team Lead");
 
-            IQueryable<Team> teamsQuery = _context.Teams
+            IQueryable<Team> query = _context.Teams
                 .Include(t => t.Project)
                 .Include(t => t.TeamLead);
 
-            if (isTeamLead)
+            if (!isCEO)
             {
-                // Взима само отбора, където TeamLeadId съвпада с текущия потребител
-                teamsQuery = teamsQuery.Where(t => t.TeamLeadId == user.Id);
+                query = query.Where(t => t.TeamLeadId == user.Id);
             }
 
-            var teams = await teamsQuery.ToListAsync();
+            // Филтриране
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(t => t.Name.Contains(search));
+            }
+            if (!string.IsNullOrEmpty(project))
+            {
+                query = query.Where(t => t.Project.Name.Contains(project));
+            }
+
+            var total = await query.CountAsync();
+            var teams = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.Search = search;
+            ViewBag.ProjectFilter = project;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.Total = total;
 
             return View(teams);
         }
 
-        // GET: Teams/Details/5
+        // ✅ DETAILS → CEO + Team Lead (само своя team)
+        [Authorize(Roles = "CEO,Team Lead")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -59,7 +74,13 @@ namespace VacationManager.Controllers
 
             if (team == null) return NotFound();
 
-            // ВЗИМАМЕ MEMBERS ПРАВИЛНО
+            var user = await _userManager.GetUserAsync(User);
+            var isCEO = await _userManager.IsInRoleAsync(user, "CEO");
+
+            if (!isCEO && team.TeamLeadId != user.Id)
+                return Forbid();
+
+            // Members
             var members = await _context.Users
                 .Where(u => u.TeamId == team.Id)
                 .ToListAsync();
@@ -69,7 +90,8 @@ namespace VacationManager.Controllers
             return View(team);
         }
 
-        // GET: Teams/Create
+        // ✅ CREATE → САМО CEO
+        [Authorize(Roles = "CEO")]
         public async Task<IActionResult> Create()
         {
             ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name");
@@ -80,22 +102,12 @@ namespace VacationManager.Controllers
             return View();
         }
 
-        // POST: Teams/Create
+        // ✅ CREATE POST → САМО CEO
+        [Authorize(Roles = "CEO")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Team team)
         {
-            _context.Teams.Add(team);
-            await _context.SaveChangesAsync();
-
-            var teamLead = await _context.Users.FindAsync(team.TeamLeadId);
-
-            if (teamLead != null)
-            {
-                teamLead.TeamId = team.Id;
-                await _context.SaveChangesAsync();
-            }
-
             if (string.IsNullOrEmpty(team.Name))
                 ModelState.AddModelError("", "Team name is required.");
 
@@ -113,21 +125,29 @@ namespace VacationManager.Controllers
             _context.Teams.Add(team);
             await _context.SaveChangesAsync();
 
+            // Assign team to Team Lead
+            var teamLead = await _context.Users.FindAsync(team.TeamLeadId);
+
+            if (teamLead != null)
+            {
+                teamLead.TeamId = team.Id;
+                await _context.SaveChangesAsync();
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Teams/Edit/5
+        // ✅ EDIT → САМО CEO
+        [Authorize(Roles = "CEO")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var team = await _context.Teams
                 .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.Id == id);
 
-            if (team == null)
-                return NotFound();
+            if (team == null) return NotFound();
 
             ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name", team.ProjectId);
 
@@ -137,7 +157,8 @@ namespace VacationManager.Controllers
             return View(team);
         }
 
-        // POST: Teams/Edit
+        // ✅ EDIT POST → САМО CEO
+        [Authorize(Roles = "CEO")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Team model)
@@ -159,7 +180,8 @@ namespace VacationManager.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        //AssignUser
+        // ✅ ASSIGN USER → САМО CEO
+        [Authorize(Roles = "CEO")]
         public async Task<IActionResult> AssignUser()
         {
             ViewData["Users"] = new SelectList(_context.Users, "Id", "Email");
@@ -168,7 +190,8 @@ namespace VacationManager.Controllers
             return View();
         }
 
-        //POST AssignUser
+        // ✅ ASSIGN USER POST → САМО CEO
+        [Authorize(Roles = "CEO")]
         [HttpPost]
         public async Task<IActionResult> AssignUser(string userId, int teamId)
         {
@@ -181,10 +204,11 @@ namespace VacationManager.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Teams");
+            return RedirectToAction(nameof(Index)); // ✅ FIX
         }
 
-        // GET: Teams/Delete/5
+        // ✅ DELETE → САМО CEO
+        [Authorize(Roles = "CEO")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -199,7 +223,8 @@ namespace VacationManager.Controllers
             return View(team);
         }
 
-        // POST: Teams/Delete
+        // ✅ DELETE POST → САМО CEO
+        [Authorize(Roles = "CEO")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
