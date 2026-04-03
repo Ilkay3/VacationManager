@@ -26,7 +26,7 @@ namespace VacationManager.Controllers
             _userManager = userManager;
         }
 
-        // MY REQUESTS (вместо Index)
+        // MY REQUESTS
         public async Task<IActionResult> MyRequests(int page = 1, int pageSize = 10)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -82,10 +82,8 @@ namespace VacationManager.Controllers
             if (user == null)
                 return RedirectToAction("Login", "Account");
 
-            // ❗ FIX
             ModelState.Remove("file");
 
-            // VALIDATION
             if (model.StartDate > model.EndDate)
                 ModelState.AddModelError("", "Start date cannot be after end date.");
 
@@ -141,6 +139,7 @@ namespace VacationManager.Controllers
 
             return RedirectToAction(nameof(MyRequests));
         }
+
         //Approve
         [Authorize]
         public async Task<IActionResult> Approve(int id)
@@ -160,7 +159,6 @@ namespace VacationManager.Controllers
 
             var isCEO = await _userManager.IsInRoleAsync(currentUser, "CEO");
 
-            // CEO винаги може да одобрява
             if (isCEO)
             {
                 request.Status = "Approved";
@@ -172,21 +170,18 @@ namespace VacationManager.Controllers
                 if (!isTeamLead)
                     return Forbid();
 
-                // Team Lead може само за своя team
                 if (request.User?.TeamId != currentUser.TeamId)
                     return Forbid();
 
-                // Проверка дали Team Lead е в отпуск
                 var leadOnLeave = await _context.VacationRequests
                     .AnyAsync(r => r.UserId == currentUser.Id
                                 && r.Status == "Approved"
                                 && r.StartDate <= DateTime.Today
                                 && r.EndDate >= DateTime.Today);
 
-                // ТУК Е КЛЮЧОВАТА ПРОМЯНА
                 if (leadOnLeave)
                 {
-                    request.Status = "Pending CEO"; // прехвърля се към CEO
+                    request.Status = "Pending CEO";
                 }
                 else
                 {
@@ -213,6 +208,7 @@ namespace VacationManager.Controllers
 			return RedirectToAction(nameof(AllRequests));
 		}
 
+        //AllRequests
         [Authorize]
         public async Task<IActionResult> AllRequests(DateTime? fromDate, int page = 1, int pageSize = 10)
         {
@@ -248,7 +244,7 @@ namespace VacationManager.Controllers
             return View(requests);
         }
 
-        //On leave
+        //InVacation
         public async Task<IActionResult> OnLeave()
         {
             var today = DateTime.Today;

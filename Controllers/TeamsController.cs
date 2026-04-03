@@ -20,7 +20,7 @@ namespace VacationManager.Controllers
             _userManager = userManager;
         }
 
-        // ✅ INDEX → CEO + Team Lead
+        // Index
         [Authorize(Roles = "CEO,Team Lead")]
         public async Task<IActionResult> Index(string search, string project, int page = 1, int pageSize = 10)
         {
@@ -36,7 +36,6 @@ namespace VacationManager.Controllers
                 query = query.Where(t => t.TeamLeadId == user.Id);
             }
 
-            // Филтриране
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(t => t.Name.Contains(search));
@@ -61,7 +60,7 @@ namespace VacationManager.Controllers
             return View(teams);
         }
 
-        // ✅ DETAILS → CEO + Team Lead (само своя team)
+        // Details
         [Authorize(Roles = "CEO,Team Lead")]
         public async Task<IActionResult> Details(int? id)
         {
@@ -80,7 +79,6 @@ namespace VacationManager.Controllers
             if (!isCEO && team.TeamLeadId != user.Id)
                 return Forbid();
 
-            // Members
             var members = await _context.Users
                 .Where(u => u.TeamId == team.Id)
                 .ToListAsync();
@@ -90,7 +88,7 @@ namespace VacationManager.Controllers
             return View(team);
         }
 
-        // ✅ CREATE → САМО CEO
+        // CREATE
         [Authorize(Roles = "CEO")]
         public async Task<IActionResult> Create()
         {
@@ -102,7 +100,7 @@ namespace VacationManager.Controllers
             return View();
         }
 
-        // ✅ CREATE POST → САМО CEO
+        // CREATE POST
         [Authorize(Roles = "CEO")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -125,7 +123,6 @@ namespace VacationManager.Controllers
             _context.Teams.Add(team);
             await _context.SaveChangesAsync();
 
-            // Assign team to Team Lead
             var teamLead = await _context.Users.FindAsync(team.TeamLeadId);
 
             if (teamLead != null)
@@ -137,7 +134,7 @@ namespace VacationManager.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ✅ EDIT → САМО CEO
+        // EDIT
         [Authorize(Roles = "CEO")]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -157,7 +154,7 @@ namespace VacationManager.Controllers
             return View(team);
         }
 
-        // ✅ EDIT POST → САМО CEO
+        // EDIT POST
         [Authorize(Roles = "CEO")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -180,7 +177,7 @@ namespace VacationManager.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ✅ ASSIGN USER → САМО CEO
+        // ASSIGN USER
         [Authorize(Roles = "CEO")]
         public async Task<IActionResult> AssignUser()
         {
@@ -190,7 +187,7 @@ namespace VacationManager.Controllers
             return View();
         }
 
-        // ✅ ASSIGN USER POST → САМО CEO
+        // ASSIGN USER POST
         [Authorize(Roles = "CEO")]
         [HttpPost]
         public async Task<IActionResult> AssignUser(string userId, int teamId)
@@ -204,10 +201,10 @@ namespace VacationManager.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index)); // ✅ FIX
+            return RedirectToAction(nameof(Index));
         }
 
-        // ✅ DELETE → САМО CEO
+        // DELETE
         [Authorize(Roles = "CEO")]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -223,7 +220,7 @@ namespace VacationManager.Controllers
             return View(team);
         }
 
-        // ✅ DELETE POST → САМО CEO
+        // DELETE POST
         [Authorize(Roles = "CEO")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]

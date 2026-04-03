@@ -18,7 +18,7 @@ namespace VacationManager.Controllers
             _userManager = userManager;
         }
 
-        // LIST
+        // RoleList
         public async Task<IActionResult> Index()
         {
             var roles = await _roleManager.Roles.ToListAsync();

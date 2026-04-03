@@ -20,6 +20,6 @@ namespace VacationManager.Models
 
         public int? TeamId { get; set; }
 
-        public string Role { get; set; }  // за избор на роля
+        public string Role { get; set; }
     }
 }

@@ -34,14 +34,12 @@ public class UsersController : Controller
         {
             var userRole = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
 
-            // Филтър по текст
             bool matchesSearch =
                 string.IsNullOrEmpty(search) ||
                 user.UserName.Contains(search) ||
                 user.FirstName.Contains(search) ||
                 user.LastName.Contains(search);
 
-            // Филтър по роля
             bool matchesRole =
                 string.IsNullOrEmpty(role) ||
                 userRole == role;
@@ -122,7 +120,6 @@ public class UsersController : Controller
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
-                // Смяна на ролята
                 var currentRoles = await _userManager.GetRolesAsync(user);
                 await _userManager.RemoveFromRolesAsync(user, currentRoles);
                 if (!string.IsNullOrEmpty(model.Role))
@@ -175,8 +172,7 @@ public class UsersController : Controller
     // GET: Users/Details/5
     public async Task<IActionResult> Details(string id)
     {
-        // Зареждаме потребителя заедно с неговия екип
-        var user = await _userManager.Users
+        var user = await _context.Users
             .Include(u => u.Team)
             .FirstOrDefaultAsync(u => u.Id == id);
 

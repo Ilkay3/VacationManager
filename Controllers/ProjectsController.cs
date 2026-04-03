@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using VacationManager.Data;
 using VacationManager.Models;
 
-[Authorize]  // Изисква логнат потребител
+[Authorize] 
 public class ProjectsController : Controller
 {
     private readonly VacationManagerDbContext _context;
@@ -14,7 +14,7 @@ public class ProjectsController : Controller
         _context = context;
     }
 
-    // LIST – достъпно за CEO и Team Lead
+    // ProjectList
     [Authorize(Roles = "CEO,Team Lead")]
     public async Task<IActionResult> Index(string search, int page = 1, int pageSize = 10)
     {
@@ -37,7 +37,7 @@ public class ProjectsController : Controller
         return View(projects);
     }
 
-    // DETAILS – достъпно за CEO и Team Lead
+    // DETAILS
     [Authorize(Roles = "CEO,Team Lead")]
     public async Task<IActionResult> Details(int id)
     {
@@ -49,10 +49,11 @@ public class ProjectsController : Controller
         return View(project);
     }
 
-    // CREATE – само CEO
+    // CREATE GET
     [Authorize(Roles = "CEO")]
     public IActionResult Create() => View();
 
+    // CREATE POST
     [Authorize(Roles = "CEO")]
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -65,7 +66,7 @@ public class ProjectsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // EDIT – само CEO
+    // EDIT GET
     [Authorize(Roles = "CEO")]
     public async Task<IActionResult> Edit(int id)
     {
@@ -74,6 +75,7 @@ public class ProjectsController : Controller
         return View(project);
     }
 
+    // EDIT POST
     [Authorize(Roles = "CEO")]
     [HttpPost]
     public async Task<IActionResult> Edit(int id, Project project)
@@ -84,7 +86,7 @@ public class ProjectsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // DELETE – само CEO
+    // DELETE
     [Authorize(Roles = "CEO")]
     public async Task<IActionResult> Delete(int id)
     {
