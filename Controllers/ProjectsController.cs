@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using VacationManager.Data;
 using VacationManager.Models;
 
-[Authorize] 
 public class ProjectsController : Controller
 {
     private readonly VacationManagerDbContext _context;
@@ -15,7 +14,7 @@ public class ProjectsController : Controller
     }
 
     // ProjectList
-    [Authorize(Roles = "CEO,Team Lead")]
+    [Authorize(Roles = "CEO,Team Lead,Developer")]
     public async Task<IActionResult> Index(string search, int page = 1, int pageSize = 10)
     {
         IQueryable<Project> query = _context.Projects;
@@ -38,7 +37,7 @@ public class ProjectsController : Controller
     }
 
     // DETAILS
-    [Authorize(Roles = "CEO,Team Lead")]
+    [Authorize(Roles = "CEO,Team Lead,Developer")]
     public async Task<IActionResult> Details(int id)
     {
         var project = await _context.Projects

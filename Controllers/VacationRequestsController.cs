@@ -12,7 +12,7 @@ using VacationManager.Models;
 
 namespace VacationManager.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "CEO,Team Lead,Developer")]
     public class VacationRequestsController : Controller
     {
         private readonly VacationManagerDbContext _context;

@@ -1,0 +1,139 @@
+<ProjectDocumentation>
+
+  <Title>Vacation Manager</Title>
+
+  <Description>
+    Vacation Manager е уеб базирана система за управление на отпуски,
+    екипи, проекти и потребители в рамките на организация.
+    Системата позволява подаване, одобрение и управление на заявки
+    за платен, неплатен и болничен отпуск.
+  </Description>
+
+  <Technologies>
+    <Framework>ASP.NET Core 8</Framework>
+    <ORM>Entity Framework Core</ORM>
+    <Database>SQL Server</Database>
+    <Authentication>ASP.NET Identity</Authentication>
+  </Technologies>
+
+  <Structure>
+
+    <Areas>
+      <Identity>
+        <Description>
+          Отговаря за автентикация и регистрация на потребители.
+        </Description>
+        <Pages>
+          <Page>Login</Page>
+          <Page>Logout</Page>
+          <Page>Register</Page>
+        </Pages>
+      </Identity>
+    </Areas>
+
+    <Controllers>
+      <Controller name="HomeController">
+        <Description>Начална страница на приложението.</Description>
+      </Controller>
+
+      <Controller name="UsersController">
+        <Description>Управление на потребители (CRUD операции, достъпни за CEO).</Description>
+      </Controller>
+
+      <Controller name="RolesController">
+        <Description>Управление на роли в системата.</Description>
+      </Controller>
+
+      <Controller name="TeamsController">
+        <Description>Управление на екипи и техните членове.</Description>
+      </Controller>
+
+      <Controller name="ProjectsController">
+        <Description>Управление на проекти и асоциираните екипи.</Description>
+      </Controller>
+
+      <Controller name="VacationRequestsController">
+        <Description>Управление на заявки за отпуск.</Description>
+      </Controller>
+    </Controllers>
+
+    <Models>
+      <Model name="ApplicationUser">
+        <Description>Разширен модел на потребител с допълнителни полета.</Description>
+      </Model>
+
+      <Model name="Project">
+        <Description>Представлява проект в системата.</Description>
+      </Model>
+
+      <Model name="Team">
+        <Description>Представлява екип от потребители.</Description>
+      </Model>
+
+      <Model name="VacationRequest">
+        <Description>Представлява заявка за отпуск.</Description>
+      </Model>
+
+      <Model name="VacationType">
+        <Description>Типове отпуски (платен, неплатен, болничен).</Description>
+      </Model>
+    </Models>
+
+    <Data>
+      <DbContext name="VacationManagerDbContext">
+        <Description>
+          Основен контекст за връзка с базата данни.
+          Управлява таблиците и релациите между моделите.
+        </Description>
+      </DbContext>
+
+      <Migrations>
+        <Description>
+          Съдържа миграции за създаване и обновяване на базата данни.
+        </Description>
+      </Migrations>
+    </Data>
+
+    <Views>
+      <Description>
+        Съдържа Razor изгледи за визуализация на данните.
+      </Description>
+      <Folders>
+        <Folder>Home</Folder>
+        <Folder>Users</Folder>
+        <Folder>Teams</Folder>
+        <Folder>Projects</Folder>
+        <Folder>Roles</Folder>
+        <Folder>VacationRequests</Folder>
+        <Folder>Shared</Folder>
+      </Folders>
+    </Views>
+
+  </Structure>
+
+  <Functionality>
+
+    <Users>
+      <Feature>Създаване, редакция и изтриване на потребители</Feature>
+      <Feature>Филтриране и странициране</Feature>
+    </Users>
+
+    <Teams>
+      <Feature>Създаване и управление на екипи</Feature>
+      <Feature>Добавяне и премахване на членове</Feature>
+    </Teams>
+
+    <Projects>
+      <Feature>Управление на проекти</Feature>
+      <Feature>Свързване с екипи</Feature>
+    </Projects>
+
+    <VacationRequests>
+      <Feature>Подаване на заявки за отпуск</Feature>
+      <Feature>Одобрение от Team Lead или CEO</Feature>
+      <Feature>Качване на файл при болничен</Feature>
+    </VacationRequests>
+
+  </Functionality>
+
+</ProjectDocumentation>

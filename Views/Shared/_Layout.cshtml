@@ -56,12 +56,16 @@
 
                         @if (User.IsInRole("Team Lead") && !User.IsInRole("CEO"))
                         {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Teams" asp-action="Index">My Team</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Projects" asp-action="Index">Projects</a>
-                                </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Teams" asp-action="Index">My Team</a>
+        </li>
+                        }
+
+                        @if (User.IsInRole("CEO") || User.IsInRole("Team Lead") || User.IsInRole("Developer"))
+                        {
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Projects" asp-action="Index">Projects</a>
+        </li>
                         }
 
                         @if (User.IsInRole("CEO") || User.IsInRole("Team Lead"))
@@ -72,7 +76,7 @@
                         }
 
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="VacationRequests" asp-action="OnLeave">On Leave</a>
+                            <a class="nav-link" asp-controller="VacationRequests" asp-action="OnLeave">In vacation</a>
                         </li>
                     </ul>
                     <partial name="_LoginPartial" />

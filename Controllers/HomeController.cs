@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -19,7 +20,7 @@ namespace VacationManager.Controllers
 			_context = context;
 		}
 
-		public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index()
 		{
 			var totalRequests = await _context.VacationRequests.CountAsync();
 			var approved = await _context.VacationRequests.CountAsync(r => r.Status == "Approved");
@@ -32,6 +33,7 @@ namespace VacationManager.Controllers
 			return View();
 		}
 
+        [Authorize(Roles = "CEO,Team Lead")]
         public async Task<IActionResult> Dashboard()
         {
             var totalRequests = await _context.VacationRequests.CountAsync();

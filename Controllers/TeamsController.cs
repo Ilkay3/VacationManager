@@ -8,7 +8,6 @@ using VacationManager.Models;
 
 namespace VacationManager.Controllers
 {
-    [Authorize]
     public class TeamsController : Controller
     {
         private readonly VacationManagerDbContext _context;
